@@ -1,0 +1,72 @@
+{
+	"name": "icontract-hypothesis-vscode",
+	"displayName": "icontract-hypothesis-vscode",
+	"description": "Automatically test Python code using icontract-hypothesis in VS Code",
+	"version": "1.0.0",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/mristin/icontract-hypothesis-vscode"
+	},
+	"homepage": "https://github.com/mristin/icontract-hypothesis-vscode",
+	"author": {
+		"name": "Marko Ristin",
+		"email": "marko@ristin.ch"
+	},
+    "publisher": "mristin",
+	"engines": {
+		"vscode": "^1.52.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onLanguage:python"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "icontract-hypothesis-vscode.pick",
+				"title": "icontract-hypothesis"
+			}
+		],
+		"menus": {
+			"editor/context": [
+				{
+					"when": "resourceLangId == python",
+					"command": "icontract-hypothesis-vscode.pick",
+					"group": "z_icontract-hypothesis-vscode"
+				}
+			]
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "npm run compile && npm run lint",
+		"lint": "eslint src --ext ts",
+		"test": "node ./out/test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/glob": "^7.1.3",
+		"@types/mocha": "^8.0.4",
+		"@types/node": "^12.11.7",
+		"@types/vscode": "^1.52.0",
+		"@typescript-eslint/eslint-plugin": "^4.14.0",
+		"@typescript-eslint/parser": "^4.14.0",
+		"eslint": "^7.18.0",
+		"eslint-config-standard": "^16.0.2",
+		"eslint-plugin-import": "^2.22.1",
+		"eslint-plugin-node": "^11.1.0",
+		"eslint-plugin-promise": "^4.2.1",
+		"glob": "^7.1.6",
+		"mocha": "^8.1.3",
+		"typescript": "^4.1.2",
+		"vscode-test": "^1.4.1"
+	},
+	"extensionDependencies": [
+		"vscode.python"
+	]
+}
