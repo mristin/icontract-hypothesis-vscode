@@ -2,7 +2,7 @@
 	"name": "icontract-hypothesis-vscode",
 	"displayName": "icontract-hypothesis-vscode",
 	"description": "Automatically test Python code using icontract-hypothesis in VS Code",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
