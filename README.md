@@ -115,6 +115,10 @@ We follow a bit unusual semantic versioning schema:
 
 ## Release Notes
 
+### 1.0.1
+
+Fix URL of the images in the Readme (#2)
+
 ### 1.0.0
 
 Initial release of icontract-hypothesis-vscode.
