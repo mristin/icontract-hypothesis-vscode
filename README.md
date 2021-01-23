@@ -50,12 +50,12 @@ The icontract-hypothesis-vscode is automatically activated when you start your
 
 You access it through the editor context pop-up menu:
 
-<img src="readme/editor-context.png" width=400 alt="editor context pop-up" />
+<img src="https://raw.githubusercontent.com/mristin/icontract-hypothesis-vscode/main/readme/editor-context.png" width=400 alt="editor context pop-up" />
 
 Once you click on it, a quick pick will appear so that you can choose one of
 the possible commands:
 
-<img src="readme/quick-pick.png" width=400 alt="quick pick" />
+<img src="https://raw.githubusercontent.com/mristin/icontract-hypothesis-vscode/main/readme/quick-pick.png" width=400 alt="quick pick" />
 
 If your file contains unsaved changes, the file will be saved first before
 the commands are executed.
