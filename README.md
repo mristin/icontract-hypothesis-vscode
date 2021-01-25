@@ -97,6 +97,20 @@ and print the test file to the standard output.
 Same as "ghostwrite explicit", but saves the generated test file to a file on
 disk. 
 
+## Commands
+
+The extension defines the following commands:
+
+* `icontract-hypothesis-vscode.pick` (Show the quickpick),
+* `icontract-hypothesis-vscode.test` (Infer the Hypothesis strategies for the current file and execute them),
+* `icontract-hypothesis-vscode.test-at` (Infer the Hypothesis strategy for the function under the caret and execute it),
+* `icontract-hypothesis-vscode.inspect` (Infer the Hypothesis strategies for the current file and inspect them),
+* `icontract-hypothesis-vscode.inspect-at` (Infer the Hypothesis strategy for the function under the caret and inspect it),
+* `icontract-hypothesis-vscode.ghostwrite-explicit` (Ghostwrite and print an explicit test file for the current file), and
+* `icontract-hypothesis-vscode.ghostwrite-explicit-to` (Ghostwrite and save an explicit test file for the current file)
+
+Please see [Section "Usage"](#Usage) for more details.
+
 ## Known Issues
 
 It is hard to control terminals in VS Code (see 

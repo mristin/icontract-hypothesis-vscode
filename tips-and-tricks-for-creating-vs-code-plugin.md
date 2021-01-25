@@ -20,7 +20,7 @@ Use output channel for process output: https://github.com/emeraldwalk/vscode-run
 
 ## Lint
 
-Fix and lint: `npx eslint src --fix`
+Fix and lint: `npx eslint src --ext ts --fix`
 
 ## Publish
 

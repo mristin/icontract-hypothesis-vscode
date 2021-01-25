@@ -80,28 +80,134 @@ function executeInRestartedTerminal (command: string): void {
   })
 }
 
-function pickCommand (pythonPath: string) {
+interface PathAndLine {
+    path: string;
+    line: number; // indexed at 1
+};
+
+function inferPathAndLine (): PathAndLine | null {
   if (!vscode.window.activeTextEditor) {
-    return
+    return null
   }
 
   if (!vscode.window.activeTextEditor.document) {
-    return
+    return null
   }
 
   if (!vscode.workspace) {
-    return
+    return null
   }
 
   const path = vscode.workspace.asRelativePath(vscode.window.activeTextEditor.document.fileName)
 
-  if (vscode.window.activeTextEditor.document.isDirty) {
-    vscode.window.activeTextEditor.document.save()
-  }
-
   // See https://github.com/microsoft/vscode/issues/111
   // We also index from 1 since both the command-line arguments and the user index from 1.
   const line = vscode.window.activeTextEditor.selection.active.line + 1
+
+  return { path, line }
+}
+
+/**
+ * Defines the function to be executed in the VS Code command.
+ */
+type CommandImpl = (pythonPath: string, escapedPath: string, line: number) => void;
+
+/**
+ * Takes care of the plumbing so that you can easily add new VS Code commands which depend
+ * on the path to the python interpreter, path to the active file and the line at the caret.
+ *
+ * The active document is always saved if dirty (otherwise the line would make little sense).
+ */
+function executeCommand (commandImpl: CommandImpl) {
+  inferPythonPath().then((pythonPath) => {
+    if (!pythonPath) {
+      return
+    }
+
+    const pathAndLine = inferPathAndLine()
+    if (!pathAndLine) {
+      return
+    }
+
+    // We do not escape double-quotes. This is so uncommon that we ignore it here.
+    if (pathAndLine.path.includes('"')) {
+      vscode.window.showErrorMessage(
+        'Path to the Python file unexpectedly contains double-quotes, ' +
+                `so icontract-hypothesis can not handle it: ${pathAndLine.path}`)
+      return
+    }
+
+    const escapedPath = pathAndLine.path.includes(' ') ? `"${pathAndLine.path}"` : pathAndLine.path
+
+    if (vscode.window.activeTextEditor?.document?.isDirty) {
+      vscode.window.activeTextEditor.document.save()
+    }
+
+    commandImpl(pythonPath, escapedPath, pathAndLine.line)
+  })
+}
+
+function executeTestCommand () {
+  executeCommand(
+    (pythonPath: string, escapedPath: string, line: number) => {
+      executeInRestartedTerminal(
+                `${pythonPath} -m icontract_hypothesis test --path ${escapedPath}`)
+    })
+}
+
+function executeTestAtCommand () {
+  executeCommand(
+    (pythonPath: string, escapedPath: string, line: number) => {
+      executeInRestartedTerminal(
+                `${pythonPath} -m icontract_hypothesis test --path ${escapedPath} --include ${line}`)
+    })
+}
+
+function executeInspectCommand () {
+  executeCommand(
+    (pythonPath: string, escapedPath: string, line: number) => {
+      executeInRestartedTerminal(
+                `${pythonPath} -m icontract_hypothesis test --path ${escapedPath} --inspect`)
+    })
+}
+
+function executeInspectAtCommand () {
+  executeCommand(
+    (pythonPath: string, escapedPath: string, line: number) => {
+      executeInRestartedTerminal(
+                `${pythonPath} -m icontract_hypothesis test --path ${escapedPath} --include ${line} --inspect`)
+    })
+}
+
+function executeGhostwriteExplicitCommand () {
+  executeCommand(
+    (pythonPath: string, escapedPath: string, line: number) => {
+      executeInRestartedTerminal(
+                `${pythonPath} -m icontract_hypothesis ghostwrite --explicit --path ${escapedPath}`)
+    })
+}
+
+function executeGhostwriteExplicitToCommand () {
+  executeCommand(
+    (pythonPath: string, escapedPath: string, line: number) => {
+      vscode.window.showSaveDialog().then(fileInfos => {
+        if (fileInfos) {
+          executeInRestartedTerminal(
+                                      `${pythonPath} -m icontract_hypothesis ghostwrite --explicit ` +
+                                      `--path ${escapedPath} --output ${fileInfos.fsPath}`
+          )
+        }
+      })
+    })
+}
+
+function executePickCommand () {
+  const pathAndLine = inferPathAndLine()
+  if (!pathAndLine) {
+    return
+  }
+
+  const { path, line } = pathAndLine
 
   // We can not dynamically change editor context menu so we need to use QuickPick,
   // see https://stackoverflow.com/questions/42586589/build-dynamic-menu-in-vscode-extension
@@ -134,16 +240,6 @@ function pickCommand (pythonPath: string) {
     }
   ]
 
-  // The escaped path does not escape double-quotes. This is so uncommon that we ignore it here.
-  if (path.includes('"')) {
-    vscode.window.showErrorMessage(
-      'Path to the Python file unexpectedly contains double-quotes, ' +
-            `so icontract-hypothesis can not handle it: ${path}`)
-    return
-  }
-
-  const escapedPath = path.includes(' ') ? `"${path}"` : path
-
   quickPick.onDidAccept(e => {
     const label = quickPick.selectedItems[0].label
 
@@ -153,48 +249,31 @@ function pickCommand (pythonPath: string) {
       case 1:
         switch (label) {
           case 'test':
-            executeInRestartedTerminal(
-                            `${pythonPath} -m icontract_hypothesis test --path ${escapedPath}`
-            )
+            executeTestCommand()
             break
           case 'test at':
-            executeInRestartedTerminal(
-                            `${pythonPath} -m icontract_hypothesis test --path ${escapedPath} --include ${line}`
-            )
+            executeTestAtCommand()
             break
           case 'inspect':
-            executeInRestartedTerminal(
-                            `${pythonPath} -m icontract_hypothesis test --inspect --path ${escapedPath}`
-            )
+            executeInspectCommand()
             break
           case 'inspect at':
-            executeInRestartedTerminal(
-                            `${pythonPath} -m icontract_hypothesis test --inspect --path ${escapedPath} --include ${line}`
-            )
+            executeInspectAtCommand()
             break
           case 'ghostwrite explicit':
-            executeInRestartedTerminal(
-                            `${pythonPath} -m icontract_hypothesis ghostwrite --explicit --path ${escapedPath}`
-            )
+            executeGhostwriteExplicitCommand()
             break
           case 'ghostwrite explicit to':
-            vscode.window.showSaveDialog().then(fileInfos => {
-              if (fileInfos) {
-                executeInRestartedTerminal(
-                                    `${pythonPath} -m icontract_hypothesis ghostwrite --explicit ` +
-                                    `--path ${escapedPath} --output ${fileInfos.fsPath}`
-                )
-              }
-            })
+            executeGhostwriteExplicitToCommand()
             break
           default:
             vscode.window.showErrorMessage(
-                            `This is an unexpected bug -- unhandled action for icontract-hypothesis: ${label}`)
+                            `Bug: unhandled action for icontract-hypothesis: ${label}`)
             break
         }
         break
       default:
-        vscode.window.showErrorMessage('Multiple actions selected for icontract-hypothesis, this is an unexpected bug.')
+        vscode.window.showErrorMessage('Bug: unexpectedly select multiple actions for icontract-hypothesis.')
         break
     }
     quickPick.hide()
@@ -203,13 +282,47 @@ function pickCommand (pythonPath: string) {
 }
 
 export function activate (context: vscode.ExtensionContext) {
-  inferPythonPath().then(pythonPath => {
-    const disposable = vscode.commands.registerCommand('icontract-hypothesis-vscode.pick', () => {
-      pickCommand(pythonPath)
+  context.subscriptions.push(
+    vscode.commands.registerCommand('icontract-hypothesis-vscode.pick', () => {
+      executePickCommand()
     })
+  )
 
-    context.subscriptions.push(disposable)
-  })
+  context.subscriptions.push(
+    vscode.commands.registerCommand('icontract-hypothesis-vscode.test', () => {
+      executeTestCommand()
+    })
+  )
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('icontract-hypothesis-vscode.test-at', () => {
+      executeTestAtCommand()
+    })
+  )
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('icontract-hypothesis-vscode.inspect', () => {
+      executeInspectCommand()
+    })
+  )
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('icontract-hypothesis-vscode.inspect-at', () => {
+      executeInspectAtCommand()
+    })
+  )
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('icontract-hypothesis-vscode.ghostwrite-explicit', () => {
+      executeGhostwriteExplicitCommand()
+    })
+  )
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('icontract-hypothesis-vscode.ghostwrite-explicit-to', () => {
+      executeGhostwriteExplicitToCommand()
+    })
+  )
 }
 
 export function deactivate () {
