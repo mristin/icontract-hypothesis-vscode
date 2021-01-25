@@ -29,6 +29,30 @@
 			{
 				"command": "icontract-hypothesis-vscode.pick",
 				"title": "icontract-hypothesis"
+			},
+			{
+				"command": "icontract-hypothesis-vscode.test",
+				"title": "Infer the Hypothesis strategies for the current file and execute them"
+			},
+			{
+				"command": "icontract-hypothesis-vscode.test-at",
+				"title": "Infer the Hypothesis strategy for the function under the caret and execute it"
+			},
+			{
+				"command": "icontract-hypothesis-vscode.inspect",
+				"title": "Infer the Hypothesis strategies for the current file and inspect them"
+			},
+			{
+				"command": "icontract-hypothesis-vscode.inspect-at",
+				"title": "Infer the Hypothesis strategy for the function under the caret and inspect it"
+			},
+			{
+				"command": "icontract-hypothesis-vscode.ghostwrite-explicit",
+				"title": "Ghostwrite and print an explicit test file for the current file"
+			},
+			{
+				"command": "icontract-hypothesis-vscode.ghostwrite-explicit-to",
+				"title": "Ghostwrite and save an explicit test file for the current file"
 			}
 		],
 		"menus": {
