@@ -129,6 +129,10 @@ We follow a bit unusual semantic versioning schema:
 
 ## Release Notes
 
+### 1.1.0
+
+Refactor actions into individual commands (#4)
+
 ### 1.0.1
 
 Fix URL of the images in the Readme (#2)
