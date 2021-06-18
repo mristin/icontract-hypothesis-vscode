@@ -21,7 +21,7 @@ following [this link][ms-python.python].
 [icontract-hypothesis][icontract-hypothesis] is *via* pip3:
 
 ```
-pip3 insatll icontract-hypothesis
+pip3 install icontract-hypothesis
 ```
 
 If you use a [virtual environment][venv], make sure that you activate it 
